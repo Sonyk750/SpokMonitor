@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+}
+
+model Site {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  name      String
+  domain    String
+  createdAt DateTime @default(now())
+
+  visits Visit[]
+}
+
+model Visit {
+  id             String   @id @default(cuid())
+  site           Site     @relation(fields: [siteId], references: [id])
+  siteId         String
+  visitorId      String
+  ip             String?
+  userAgent      String?
+  browser        String?
+  os             String?
+  device         String?
+  referrer       String?
+  referrerSource String?
+  entryPath      String
+  country        String?
+  startedAt      DateTime @default(now())
+  lastSeenAt     DateTime @default(now())
+
+  pageviews PageView[]
+
+  @@index([siteId, startedAt])
+  @@index([siteId, visitorId, lastSeenAt])
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  visit     Visit    @relation(fields: [visitId], references: [id])
+  visitId   String
+  path      String
+  createdAt DateTime @default(now())
+
+  @@index([visitId])
+}
